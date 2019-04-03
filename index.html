@@ -1,0 +1,92 @@
+<html>
+    <head>
+        <title>Arbor Vitae</title>
+        <link href="https://fonts.googleapis.com/css?family=Poiret+One" rel="stylesheet">
+    </head>
+    <body>
+    <svg viewBox="-15 -25 30 50">
+        </filter>
+        <g id="tree" transform="rotate(180) translate(0 -3)"></g>
+        <g id="wall">
+            <circle width="40" height="40" class="circle" cx="0" cy="-11" r="13" fill="none" stroke-dasharray="0.6 0.203" stroke-width="0.3" stroke="#262626"></circle>
+        </g>
+        <g id="name" transform="translate(-8 -2)">
+            <text font-size="2pt" fill="#262626" font-family="Poiret One">Arbor&nbsp;&nbsp;Vitae</text>
+        </g>
+    </svg>
+    <script>
+    const rgbToHex = (r, g, b) => '#' + [r, g, b]
+      .map(x => Math.floor(x).toString(16).padStart(2, '0')).join('')
+
+    Math.seed = function(s) {
+        var mask = 0xffffffff;
+        var m_w  = (123456789 + s) & mask;
+        var m_z  = (987654321 - s) & mask;
+
+        return function() {
+          m_z = (36969 * (m_z & 65535) + (m_z >>> 16)) & mask;
+          m_w = (18000 * (m_w & 65535) + (m_w >>> 16)) & mask;
+
+          var result = ((m_z << 16) + (m_w & 65535)) >>> 0;
+          result /= 4294967296;
+          return result;
+        }
+    }
+
+
+    function group(parent, twigs, props, depth) {
+        var branch = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "line");
+        branch.setAttributeNS(null, "x1", 0);
+        branch.setAttributeNS(null, "y1", depth == 0 ? 4 : 0);
+        branch.setAttributeNS(null, "x2", 0);
+        branch.setAttributeNS(null, "y2", props.length);
+        var c = props.alpha * Math.pow(0.80, props.maxdepth - depth) * 256;
+        branch.setAttributeNS(null, "stroke", rgbToHex(c, c, c));
+        branch.setAttributeNS(null, "stroke-width", props.width);
+        //branch.setAttributeNS(null, "stroke-linecap", "round");
+        branch = parent.appendChild(branch);
+        if (depth >= props.maxdepth) return;
+        twigs
+            .sort(x => random())
+            .concat(random() < props.extrachance / Math.pow(depth, 0.5)? [ { angle: 90 * random() - 45 } ] : [])
+            .concat(random() < props.extrachance / Math.pow(depth, 0.5)? [ { angle: 90 * random() - 45 } ] : [])
+            .concat(random() < props.extrachance / Math.pow(depth, 0.5)? [ { angle: 90 * random() - 45 } ] : [])
+            .forEach((twig, i) => {
+                var skip = (random() < props.skipchance && (i == 0 || i == 3) || i >= 4) ? 2 : 1;
+                var g = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "g");
+                g.setAttributeNS(null, "transform", 
+                    "translate(0 " + (props.length * 0.95) + ") " + 
+                    "scale(" + Math.pow(props.scale * (random() * 0.2 + 0.8), skip * (random() * 0.3 + 0.7)) + ") " + 
+                    "rotate(" + (twig.angle + random() * 20 - 10) + ")");
+                g = parent.appendChild(g);
+                group(g, twigs, props, depth + skip);
+                //group(g, twigs, props, depth + 1);
+            }
+        )
+    }
+
+    var random = Math.seed(1234);
+    var twigs = [
+        { angle: -50},
+        { angle: -15},
+        { angle: 12},
+        { angle: 45},
+    ];
+    var props = {
+        length: 10,
+        alpha: 0.9,
+        width: 1,
+        scale: 0.6,
+        maxdepth: 8,
+        extrachance: 0.15,
+        skipchance: 0.05,
+    };
+    group(document.getElementById("tree"), twigs, props, 0);
+
+    </script>
+    </body>
+</html>
