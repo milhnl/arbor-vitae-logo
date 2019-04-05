@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>Arbor Vitae</title>
+        <meta charset="utf-8" />
         <link href="https://fonts.googleapis.com/css?family=Poiret+One" rel="stylesheet">
     </head>
     <body>
@@ -89,6 +90,14 @@
         skipchance: 0.20,
         phi: (1 + Math.sqrt(5)) / 2,
     };
+
+    document.addEventListener("click", () => {
+        var seed = Number(prompt("New seed"));
+        if (seed == null) return;
+        document.getElementById("tree").innerHTML = "";
+        group(document.getElementById("tree"), cfg, 0, seed);
+        document.title = seed;
+    });
 
     var seed = Math.floor(Math.random() * 1000000);
     group(document.getElementById("tree"), cfg, 0, seed);
