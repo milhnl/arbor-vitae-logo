@@ -32,40 +32,45 @@
         }
     }
 
-
-    function group(parent, twigs, props, depth) {
-        var branch = document.createElementNS(
+    function createSvgElement(tagname, attributes) {
+        var element = document.createElementNS(
             "http://www.w3.org/2000/svg",
-            "line");
-        branch.setAttributeNS(null, "x1", 0);
-        branch.setAttributeNS(null, "y1", depth == 0 ? 4 : 0);
-        branch.setAttributeNS(null, "x2", 0);
-        branch.setAttributeNS(null, "y2", props.length);
-        var c = props.alpha * Math.pow(0.80, props.maxdepth - depth) * 256;
-        branch.setAttributeNS(null, "stroke", rgbToHex(c, c, c));
-        branch.setAttributeNS(null, "stroke-width", props.width);
-        //branch.setAttributeNS(null, "stroke-linecap", "round");
-        branch = parent.appendChild(branch);
-        if (depth >= props.maxdepth) return;
+            tagname
+        );
+        Object.entries(attributes)
+            .forEach(x => element.setAttributeNS(null, x[0], x[1]));
+        return element;
+    }
+
+    function group(parent, depth) {
+        parent.appendChild(createSvgElement("line", {
+            "x1": 0,
+            "y1": depth == 0 ? 4 : 0,
+            "x2": 0,
+            "y2": cfg.length,
+            "stroke": rgbToHex(...new Array(3).fill(cfg.alpha *
+                    Math.pow(0.80, cfg.maxdepth - depth) * 256)),
+            "stroke-width": cfg.width,
+        }));
+        if (depth >= cfg.maxdepth) return;
         twigs
             .sort(x => random())
-            .concat(random() < props.extrachance / Math.pow(depth, 0.5)? [ { angle: 90 * random() - 45 } ] : [])
-            .concat(random() < props.extrachance / Math.pow(depth, 0.5)? [ { angle: 90 * random() - 45 } ] : [])
-            .concat(random() < props.extrachance / Math.pow(depth, 0.5)? [ { angle: 90 * random() - 45 } ] : [])
+            .concat(random() < cfg.extrachance / Math.pow(depth, 0.5) ? [ { angle: 90 * random() - 45 } ] : [])
+            .concat(random() < cfg.extrachance / Math.pow(depth, 0.5) ? [ { angle: 90 * random() - 45 } ] : [])
+            .concat(random() < cfg.extrachance / Math.pow(depth, 0.5) ? [ { angle: 90 * random() - 45 } ] : [])
             .forEach((twig, i) => {
-                var skip = (random() < props.skipchance && (i == 0 || i == 3) || i >= 4) ? 2 : 1;
-                var g = document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "g");
-                g.setAttributeNS(null, "transform", 
-                    "translate(0 " + (props.length * 0.95) + ") " + 
-                    "scale(" + Math.pow(props.scale * (random() * 0.2 + 0.8), skip * (random() * 0.3 + 0.7)) + ") " + 
-                    "rotate(" + (twig.angle + random() * 20 - 10) + ")");
-                g = parent.appendChild(g);
-                group(g, twigs, props, depth + skip);
-                //group(g, twigs, props, depth + 1);
-            }
-        )
+                var skip = (random() < cfg.skipchance && (i == 0 || i == 3) || i >= 4) ? 2 : 1;
+                var g = parent.appendChild(createSvgElement("g", {
+                    "transform":
+                        "translate(0 " + (cfg.length * 0.95) + ") " + 
+                        "scale(" + Math.pow(
+                            cfg.scale * (random() * 0.2 + 0.8), 
+                            skip * (random() * 0.3 + 0.7)
+                        ) + ") " + 
+                        "rotate(" + (twig.angle + random() * 20 - 10) + ")"
+                }));
+                group(g, depth + skip);
+            });
     }
 
     var random = Math.seed(1234);
@@ -75,7 +80,7 @@
         { angle: 12},
         { angle: 45},
     ];
-    var props = {
+    var cfg = {
         length: 10,
         alpha: 0.9,
         width: 1,
@@ -83,8 +88,13 @@
         maxdepth: 8,
         extrachance: 0.15,
         skipchance: 0.05,
+        //maxtwigs: 8,
+        //mintwigs: 3,
+        //skipchance: 0.20,
+        //phi: (1 + Math.sqrt(5)) / 2,
     };
-    group(document.getElementById("tree"), twigs, props, 0);
+    document.getElementById("tree").innerHtml = "";
+    group(document.getElementById("tree"), 0);
 
     </script>
     </body>
