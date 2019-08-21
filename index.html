@@ -92,7 +92,7 @@
 
     document.addEventListener("click", () => {
         var seed = Number(prompt("New seed"));
-        if (seed == null) return;
+        if (seed == null || seed == 0) return;
         document.getElementById("tree").innerHTML = "";
         group(document.getElementById("tree"), cfg, 0, seed);
         document.title = seed;
