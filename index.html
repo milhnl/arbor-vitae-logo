@@ -44,7 +44,6 @@
     }
 
     function group(parent, cfg, depth, seed) {
-        var random = Math.seed(seed);
         parent.appendChild(createSvgElement("line", {
             "x1": 0,
             "y1": depth == 0 ? 4 : 0,
@@ -55,12 +54,12 @@
             "stroke-width": cfg.width,
         }));
         if (depth >= cfg.maxdepth) return;
+        var random = Math.seed(seed);
         var twigs = depth != 0 ? Math.floor(Math.sqrt(random() * Math.pow(2,
                 cfg.maxtwigs - cfg.mintwigs - depth)) + cfg.mintwigs) : 5;
-        new Array(cfg.maxtwigs)
+        new Array(twigs)
             .fill()
-            .map((_, i) => [random(), (i * cfg.phi) % 1])
-            .slice(0, twigs)
+            .map((_, i) => [random(), i])
             .forEach((twig) => {
                 var random = Math.seed(twig[0] * 1000000000);
                 var nextseed = random() * 1000000000;
@@ -72,7 +71,7 @@
                             cfg.scale * (random() * 0.2 + 0.8),
                             skip * (random() * 0.3 + 0.7)
                         ) + ") " +
-                        "rotate(" + (twig[1] * 120 - 60) + ")"
+                        "rotate(" + ((twig[1] * cfg.phi % 1) * 120 - 60) + ")"
                 }));
                 group(g, cfg, depth + skip, nextseed);
             }
